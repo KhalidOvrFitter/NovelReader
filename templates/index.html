@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Novel Reader</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="title-container">
+            <h1>Novel Reader</h1>
+            <div id="help-icon-wrapper">
+                <span id="help-icon">[?]</span>
+                <div id="shortcuts-popup" class="hidden">
+                    <strong>Keyboard Shortcuts</strong>
+                    <ul>
+                        <li><span class="key">Space</span> - Play/Pause</li>
+                        <li><span class="key">&larr;</span> - Seek Backward 5s</li>
+                        <li><span class="key">&rarr;</span> - Seek Forward 5s</li>
+                        <li><span class="key">Esc</span> - Stop</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="controls">
+            <div class="control-group">
+                <label for="voice-select">Voice:</label>
+                <select id="voice-select"></select>
+            </div>
+            <div class="control-group">
+                <label for="speed-control">Speed:</label>
+                <input type="range" id="speed-control" min="0.5" max="2" step="0.1" value="1">
+                <span id="speed-value">1x</span>
+            </div>
+        </div>
+        <textarea id="text-input" placeholder="Paste your novel chapter here..."></textarea>
+        <div class="playback-controls">
+            <button id="play-btn">Play</button>
+            <button id="pause-btn">Pause</button>
+            <button id="stop-btn">Stop</button>
+        </div>
+
+        <div class="progress-container">
+            <div id="progress-bar-wrapper">
+                <div id="progress-bar"></div>
+            </div>
+            <span id="time-display">00:00 / 00:00</span>
+        </div>
+        <div id="status-bar" class="status-bar">&nbsp;</div>
+        <div id="text-display-wrapper">
+            <div id="text-display"></div>
+        </div>
+    </div>
+
+    <audio id="audio-player" style="display: none;"></audio>
+
+    <script src="/static/js/script.js"></script>
+</body>
+</html>
