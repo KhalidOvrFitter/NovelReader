@@ -237,10 +237,18 @@ h1 {
     text-align: justify;
 }
 
+#text-display .word.chunk-highlight {
+    background-color: #1a4a1a; /* A darker green for the chunk background */
+    transition: background-color 0.5s ease-in-out;
+}
+
 #text-display .word.highlight {
-    background-color: #0f0;
-    color: #000;
-    padding: 2px 0;
+    background-color: #ff0000 !important; /* Bright red for visibility */
+    color: #ffff00 !important; /* Yellow text */
+    padding: 2px 4px !important;
+    border-radius: 2px !important;
+    border: 2px solid #ffffff !important; /* White border */
+    font-weight: bold !important;
 }
 
 .playback-controls button:active {
