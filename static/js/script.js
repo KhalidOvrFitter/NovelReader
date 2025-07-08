@@ -333,9 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     audioPlayer.addEventListener('timeupdate', () => {
         updateProgress();
-        if (subtitles.length > 0) {
-            highlightCurrentWord(audioPlayer.currentTime);
-        }
+        highlightCurrentWord(audioPlayer.currentTime);
     });
 
     progressBarWrapper.addEventListener('click', (e) => {
@@ -408,13 +406,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchAndParseSubtitles(url, wordOffset = 0) {
         try {
-            console.log(`Fetching subtitles from: ${url} with wordOffset: ${wordOffset}`);
             const response = await fetch(url);
             if (!response.ok) throw new Error(`Subtitle fetch failed: ${response.status}`);
             const srtContent = await response.text();
-            console.log(`Subtitle content (first 200 chars):`, srtContent.substring(0, 200));
             subtitles = parseSRT(srtContent, wordOffset);
-            console.log(`Parsed ${subtitles.length} subtitle entries:`, subtitles.slice(0, 5));
         } catch (error) {
             console.error(error);
             subtitles = [];
@@ -435,10 +430,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 wordCounter++;
             }
         }
-        console.log(`parseSRT: Created ${subs.length} subtitle entries with wordOffset ${wordOffset}`);
-        if (subs.length > 0) {
-            console.log(`First few subtitles with timing:`, subs.slice(0, 3));
-        }
         return subs;
     }
 
@@ -450,36 +441,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function highlightCurrentWord(currentTime) {
-        console.log(`Highlighting at time: ${currentTime.toFixed(2)}s, subtitles count: ${subtitles.length}`);
-        
         const activeSubtitle = subtitles.find(sub => currentTime >= sub.start && currentTime <= sub.end);
 
-        if (activeSubtitle) {
-            console.log(`Found active subtitle:`, activeSubtitle);
-            
-            if (activeSubtitle.wordIndex !== currentWordIndex) {
-                // Remove highlight from the previous word
-                if (currentWordIndex !== -1) {
-                    const prevWordEl = document.querySelector(`span[data-word-index='${currentWordIndex}']`);
-                    if (prevWordEl) {
-                        prevWordEl.classList.remove('highlight');
-                        console.log(`Removed highlight from word ${currentWordIndex}`);
-                    }
+        if (activeSubtitle && activeSubtitle.wordIndex !== currentWordIndex) {
+            // Remove highlight from the previous word
+            if (currentWordIndex !== -1) {
+                const prevWordEl = document.querySelector(`span[data-word-index='${currentWordIndex}']`);
+                if (prevWordEl) {
+                    prevWordEl.classList.remove('highlight');
                 }
-
-                // Highlight the new word
-                const newWordIndex = activeSubtitle.wordIndex;
-                const currentWordEl = document.querySelector(`span[data-word-index='${newWordIndex}']`);
-                if (currentWordEl) {
-                    currentWordEl.classList.add('highlight');
-                    console.log(`Added highlight to word ${newWordIndex}: "${currentWordEl.textContent.trim()}"`);
-                } else {
-                    console.log(`Could not find word element for index ${newWordIndex}`);
-                }
-                currentWordIndex = newWordIndex;
             }
-        } else {
-            console.log(`No active subtitle found for time ${currentTime.toFixed(2)}s`);
+
+            // Highlight the new word
+            const newWordIndex = activeSubtitle.wordIndex;
+            const currentWordEl = document.querySelector(`span[data-word-index='${newWordIndex}']`);
+            if (currentWordEl) {
+                currentWordEl.classList.add('highlight');
+                scrollToWord(currentWordEl);
+            }
+            currentWordIndex = newWordIndex;
         }
     }
 

@@ -243,12 +243,12 @@ h1 {
 }
 
 #text-display .word.highlight {
-    background-color: #ff0000 !important; /* Bright red for visibility */
-    color: #ffff00 !important; /* Yellow text */
-    padding: 2px 4px !important;
-    border-radius: 2px !important;
-    border: 2px solid #ffffff !important; /* White border */
-    font-weight: bold !important;
+    background-color: #00ff41; /* Bright terminal green */
+    color: #000000; /* Black text for contrast */
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-weight: bold;
+    box-shadow: 0 0 3px rgba(0, 255, 65, 0.5);
 }
 
 .playback-controls button:active {
