@@ -470,3 +470,24 @@ body.theme-monochrome .status-bar {
 .status-bar .cursor {
     animation: blink 1s step-end infinite;
 }
+
+/* Large Text Mode Styles */
+body.large-text-mode #text-input {
+    display: none;
+}
+
+body.large-text-mode #text-display-wrapper {
+    font-size: 1.5em; /* Increase font size by 50% */
+    max-height: none; /* Allow it to take more vertical space */
+}
+
+/* Style for the new checkbox */
+#large-text-mode {
+    margin-left: 5px;
+    transform: scale(1.2); /* Slightly larger checkbox */
+    accent-color: #0f0; /* Green accent for the checkbox */
+}
+
+body.theme-monochrome #large-text-mode {
+    accent-color: #fff; /* White accent for monochrome theme */
+}

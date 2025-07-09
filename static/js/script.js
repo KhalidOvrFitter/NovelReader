@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const helpIcon = document.getElementById('help-icon');
     const shortcutsPopup = document.getElementById('shortcuts-popup');
     const themeSelect = document.getElementById('theme-select');
+    const largeTextModeCheckbox = document.getElementById('large-text-mode');
 
     let subtitles = [];
     let currentWordIndex = -1;
@@ -559,6 +560,27 @@ document.addEventListener('DOMContentLoaded', () => {
     helpIcon.addEventListener('mouseleave', () => {
         shortcutsPopup.classList.add('hidden');
     });
+
+    // --- Large Text Mode ---
+    largeTextModeCheckbox.addEventListener('change', () => {
+        if (largeTextModeCheckbox.checked) {
+            document.body.classList.add('large-text-mode');
+            textInput.style.display = 'none'; // Ensure it's hidden
+        } else {
+            document.body.classList.remove('large-text-mode');
+            textInput.style.display = ''; // Restore default display
+        }
+        // Persist setting
+        localStorage.setItem('largeTextMode', largeTextModeCheckbox.checked);
+    });
+
+    // Load saved large text mode setting
+    const savedLargeTextMode = localStorage.getItem('largeTextMode');
+    if (savedLargeTextMode === 'true') {
+        largeTextModeCheckbox.checked = true;
+        document.body.classList.add('large-text-mode');
+        textInput.style.display = 'none';
+    }
     
     // --- Theme Switching ---
     // Load saved theme from localStorage if available
