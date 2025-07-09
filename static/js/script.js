@@ -23,8 +23,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Chunking & Queueing State ---
     let audioQueue = [];
     let currentChunkIndex = -1;
-    const CHUNK_SIZE_WORDS = 120; // Target ~120 words per chunk
+    // const CHUNK_SIZE_WORDS = 120; // No longer used for paragraph chunking
     const BUFFER_AHEAD = 2; // Pre-fetch 2 chunks ahead
+    const SHORT_PARAGRAPH_WORD_THRESHOLD = 10;
+    const SHORT_PARAGRAPH_CHAR_THRESHOLD = 50;
 
     // --- Helper function to manage button states ---
     function setButtonState(state) {
@@ -86,36 +88,53 @@ document.addEventListener('DOMContentLoaded', () => {
         audioPlayer.playbackRate = speedControl.value;
     });
 
-    function chunkText(text, targetWordCount) {
-        const words = text.split(/\s+/);
-        const sentences = text.match(/[^.!?]+[.!?]+\s*/g) || [text];
+    function chunkText(fullTextContent, targetWordCount) { // targetWordCount is no longer used but kept for signature compatibility
         const chunks = [];
-        let currentChunkSentences = [];
-        let wordCount = 0;
-        let startWordIndex = 0;
-
-        for (const sentence of sentences) {
-            const sentenceWordCount = sentence.split(/\s+/).length;
-            if (wordCount + sentenceWordCount > targetWordCount && currentChunkSentences.length > 0) {
-                chunks.push({
-                    text: currentChunkSentences.join(' '),
-                    startWord: startWordIndex,
-                    endWord: startWordIndex + wordCount -1,
-                });
-                currentChunkSentences = [];
-                startWordIndex += wordCount;
-                wordCount = 0;
-            }
-            currentChunkSentences.push(sentence);
-            wordCount += sentenceWordCount;
+        if (!fullTextContent || fullTextContent.trim() === '') {
+            return chunks;
         }
 
-        if (currentChunkSentences.length > 0) {
+        // Create a list of all words in the full text to correctly map start/end word indices
+        const allWordsInFullText = fullTextContent.split(/\s+/).filter(word => word.length > 0);
+        let globalWordOffset = 0; // Tracks the word index in allWordsInFullText
+
+        // Split text into paragraphs. Handles Windows and Unix line endings, and multiple blank lines.
+        const paragraphs = fullTextContent.split(/\r?\n\s*\r?\n*/).map(p => p.trim()).filter(p => p.length > 0);
+
+        if (paragraphs.length === 0) {
+            return chunks;
+        }
+
+        let currentChunkParagraphs = [];
+        let paragraphIndex = 0;
+
+        while (paragraphIndex < paragraphs.length) {
+            let currentParagraph = paragraphs[paragraphIndex].trim();
+            currentChunkParagraphs.push(currentParagraph);
+
+            const currentCombinedText = currentChunkParagraphs.join('\n\n'); // Use double newline as paragraph separator
+            const wordsInCombinedText = currentCombinedText.split(/\s+/).filter(w => w.length > 0);
+            const isShort = wordsInCombinedText.length < SHORT_PARAGRAPH_WORD_THRESHOLD || currentCombinedText.length < SHORT_PARAGRAPH_CHAR_THRESHOLD;
+
+            // If it's short AND there's a next paragraph to merge with, continue accumulating
+            if (isShort && (paragraphIndex + 1 < paragraphs.length)) {
+                paragraphIndex++;
+                continue;
+            }
+
+            // Finalize the chunk
+            const chunkTextContent = currentCombinedText;
+            const numWordsInChunk = wordsInCombinedText.length;
+
             chunks.push({
-                text: currentChunkSentences.join(' '),
-                startWord: startWordIndex,
-                endWord: words.length - 1,
+                text: chunkTextContent,
+                startWord: globalWordOffset,
+                endWord: globalWordOffset + numWordsInChunk - 1,
             });
+
+            globalWordOffset += numWordsInChunk;
+            currentChunkParagraphs = []; // Reset for the next chunk
+            paragraphIndex++;
         }
         return chunks;
     }
