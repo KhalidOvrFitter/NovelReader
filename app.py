@@ -63,4 +63,4 @@ def get_audio(filename):
     return send_from_directory(AUDIO_DIR, filename)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=12000)

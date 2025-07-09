@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const timeDisplay = document.getElementById('time-display');
     const helpIcon = document.getElementById('help-icon');
     const shortcutsPopup = document.getElementById('shortcuts-popup');
+    const themeSelect = document.getElementById('theme-select');
 
     let subtitles = [];
     let currentWordIndex = -1;
@@ -509,6 +510,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     helpIcon.addEventListener('mouseleave', () => {
         shortcutsPopup.classList.add('hidden');
+    });
+    
+    // --- Theme Switching ---
+    // Load saved theme from localStorage if available
+    const savedTheme = localStorage.getItem('novelReaderTheme');
+    if (savedTheme) {
+        themeSelect.value = savedTheme;
+        if (savedTheme === 'monochrome') {
+            document.body.classList.add('theme-monochrome');
+        }
+    }
+    
+    // Handle theme changes
+    themeSelect.addEventListener('change', () => {
+        const selectedTheme = themeSelect.value;
+        
+        if (selectedTheme === 'monochrome') {
+            document.body.classList.add('theme-monochrome');
+        } else {
+            document.body.classList.remove('theme-monochrome');
+        }
+        
+        // Save theme preference to localStorage
+        localStorage.setItem('novelReaderTheme', selectedTheme);
     });
 
     function focusOnChunk(index) {
