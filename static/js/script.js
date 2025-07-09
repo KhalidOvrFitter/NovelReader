@@ -415,13 +415,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function setupTextDisplay(text) {
         textDisplay.innerHTML = '';
-        const words = text.split(/\s+/);
-        words.forEach((word, index) => {
-            const span = document.createElement('span');
-            span.textContent = word + ' ';
-            span.classList.add('word');
-            span.dataset.wordIndex = index;
-            textDisplay.appendChild(span);
+        
+        // Split text into segments that preserve whitespace
+        const segments = text.split(/(\s+)/);
+        let wordIndex = 0;
+        
+        segments.forEach(segment => {
+            if (segment.match(/^\s+$/)) {
+                // This is a whitespace segment - preserve it
+                if (segment.includes('\n')) {
+                    // Contains line breaks - split and add <br> elements
+                    const lines = segment.split('\n');
+                    for (let i = 0; i < lines.length - 1; i++) {
+                        if (lines[i]) {
+                            // Add any spaces before the newline
+                            textDisplay.appendChild(document.createTextNode(lines[i]));
+                        }
+                        textDisplay.appendChild(document.createElement('br'));
+                    }
+                    // Add any trailing spaces after the last newline
+                    if (lines[lines.length - 1]) {
+                        textDisplay.appendChild(document.createTextNode(lines[lines.length - 1]));
+                    }
+                } else {
+                    // Just spaces/tabs - add as text node
+                    textDisplay.appendChild(document.createTextNode(segment));
+                }
+            } else if (segment.trim()) {
+                // This is a word - create span for highlighting
+                const span = document.createElement('span');
+                span.textContent = segment;
+                span.classList.add('word');
+                span.dataset.wordIndex = wordIndex;
+                textDisplay.appendChild(span);
+                wordIndex++;
+            }
         });
     }
 
