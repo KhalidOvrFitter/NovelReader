@@ -112,7 +112,8 @@ document.addEventListener('DOMContentLoaded', () => {
             let currentParagraph = paragraphs[paragraphIndex].trim();
             currentChunkParagraphs.push(currentParagraph);
 
-            const currentCombinedText = currentChunkParagraphs.join('\n\n'); // Use double newline as paragraph separator
+            // Use single newline as paragraph separator for TTS text
+            const currentCombinedText = currentChunkParagraphs.join('\n');
             const wordsInCombinedText = currentCombinedText.split(/\s+/).filter(w => w.length > 0);
             const isShort = wordsInCombinedText.length < SHORT_PARAGRAPH_WORD_THRESHOLD || currentCombinedText.length < SHORT_PARAGRAPH_CHAR_THRESHOLD;
 
