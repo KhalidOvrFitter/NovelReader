@@ -57,6 +57,6 @@ To run this project on your local machine, follow these steps:
 
 6.  **View in Browser**: The terminal will show that the server is running. Open your web browser and navigate to:
 
-    [http://127.0.0.1:5000](http://127.0.0.1:5000)
+    [http://127.0.0.1:12000](http://127.0.0.1:12000)
 
 You should now see the Novel Reader application running and ready to use.
