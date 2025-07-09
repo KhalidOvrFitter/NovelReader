@@ -267,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // --- Start new playback with chunking ---
         setupTextDisplay(text); // Display the full text once
-        const textChunks = chunkText(text, CHUNK_SIZE_WORDS);
+        const textChunks = chunkText(text); // CHUNK_SIZE_WORDS argument removed
         audioQueue = textChunks.map(chunkData => ({
             ...chunkData,
             status: 'pending', // pending, buffering, ready, error
