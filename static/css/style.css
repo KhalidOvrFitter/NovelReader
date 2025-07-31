@@ -443,6 +443,24 @@ body.theme-monochrome #progress-bar {
     text-align: right;
 }
 
+/* ASCII Visualizer */
+#ascii-visualizer {
+    font-family: 'Courier New', Courier, monospace;
+    color: #0f0;
+    margin: -10px 0 12px 0; /* tuck under progress container */
+    letter-spacing: 1px;
+    user-select: none;
+    white-space: nowrap;
+    text-align: center; /* center the single-line equalizer */
+    text-shadow: 0 0 5px rgba(0,255,0,0.4);
+}
+
+body.theme-monochrome #ascii-visualizer {
+    color: #fff;
+    text-shadow: 0 0 5px rgba(255,255,255,0.25);
+    text-align: center; /* ensure centering in monochrome as well */
+}
+
 .status-bar {
     border: 1px solid #0f0;
     padding: 10px;

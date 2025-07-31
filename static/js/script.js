@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const progressBar = document.getElementById('progress-bar');
     const progressBarWrapper = document.getElementById('progress-bar-wrapper');
     const timeDisplay = document.getElementById('time-display');
+    const asciiVisualizer = document.getElementById('ascii-visualizer');
     const helpIcon = document.getElementById('help-icon');
     const shortcutsPopup = document.getElementById('shortcuts-popup');
     const themeSelect = document.getElementById('theme-select');
@@ -83,6 +84,9 @@ document.addEventListener('DOMContentLoaded', () => {
         option.textContent = voice.name;
         voiceSelect.appendChild(option);
     });
+    
+    // Set Eric (US, Male) as the default voice
+    voiceSelect.value = 'en-US-EricNeural';
 
     speedControl.addEventListener('input', () => {
         speedValue.textContent = `${speedControl.value}x`;
@@ -356,6 +360,7 @@ document.addEventListener('DOMContentLoaded', () => {
     audioPlayer.addEventListener('timeupdate', () => {
         updateProgress();
         highlightCurrentWord(audioPlayer.currentTime);
+        updateAsciiVisualizer();
     });
 
     progressBarWrapper.addEventListener('click', (e) => {
@@ -401,6 +406,8 @@ document.addEventListener('DOMContentLoaded', () => {
     audioPlayer.addEventListener('play', () => {
         statusBar.innerHTML = 'STATUS: PLAYING';
         setButtonState('playing');
+        // Kick visualizer on play in case timeupdate throttles
+        updateAsciiVisualizer(true);
     });
 
     audioPlayer.addEventListener('pause', () => {
@@ -413,6 +420,35 @@ document.addEventListener('DOMContentLoaded', () => {
             setButtonState('finished');
         }
     });
+    
+    // --- ASCII Visualizer ---
+    // Simple bar set from low to high. Terminal-friendly characters.
+    const ASCII_BARS = ['▁','▂','▃','▄','▅','▆','▇','█'];
+    const VISUALIZER_WIDTH = 24; // number of columns
+    let visPhase = 0; // for deterministic animation when no amplitude data available
+    
+    function updateAsciiVisualizer(force = false) {
+        if (!asciiVisualizer) return;
+        // Build a pseudo-spectrum using playback time and a phase offset to avoid flat lines
+        // We intentionally keep this lightweight and deterministic (no WebAudio dependency)
+        const t = audioPlayer.currentTime || 0;
+        // When paused and not forcing, keep last frame
+        if (audioPlayer.paused && !force) return;
+        
+        let out = '';
+        for (let i = 0; i < VISUALIZER_WIDTH; i++) {
+            // Create varying frequencies across columns
+            const base = i * 0.45 + visPhase * 0.12;
+            // Combine a few sines for a retro feel
+            const v = Math.sin(t * 3.1 + base) * 0.6 + Math.sin(t * 1.7 + base * 1.3) * 0.4;
+            // Normalize to 0..1
+            const n = (v + 1) / 2;
+            const idx = Math.min(ASCII_BARS.length - 1, Math.max(0, Math.floor(n * ASCII_BARS.length)));
+            out += ASCII_BARS[idx];
+        }
+        asciiVisualizer.textContent = out;
+        visPhase += 1;
+    }
 
     function setupTextDisplay(text) {
         textDisplay.innerHTML = '';
