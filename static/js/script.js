@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function playChunk(index, seekTime = null) {
+    async function playChunk(index, seekTime = null, seekWordIndex = null) {
         resetHighlighting(); // Reset state for the new chunk.
         if (index >= audioQueue.length) {
             statusBar.textContent = 'STATUS: FINISHED';
@@ -231,9 +231,28 @@ document.addEventListener('DOMContentLoaded', () => {
             audioPlayer.playbackRate = speedControl.value;
             await fetchAndParseSubtitles(chunk.subtitleUrl, chunk.startWord);
 
+            // Determine final start time if a target word index was provided
+            let finalSeekTime = seekTime;
+            if (finalSeekTime === null && seekWordIndex !== null && Array.isArray(subtitles) && subtitles.length > 0) {
+                // Find the subtitle entry that best matches the target word index
+                let best = null;
+                let bestDelta = Infinity;
+                for (const sub of subtitles) {
+                    const delta = Math.abs(sub.wordIndex - seekWordIndex);
+                    if (delta < bestDelta) {
+                        bestDelta = delta;
+                        best = sub;
+                        if (delta === 0) break;
+                    }
+                }
+                if (best) {
+                    finalSeekTime = best.start;
+                }
+            }
+
             const startPlayback = () => {
-                if (seekTime !== null) {
-                    audioPlayer.currentTime = seekTime;
+                if (finalSeekTime !== null) {
+                    audioPlayer.currentTime = finalSeekTime;
                 }
                 audioPlayer.play();
             };
@@ -680,4 +699,81 @@ document.addEventListener('DOMContentLoaded', () => {
             textDisplayWrapper.scrollTop += (wordRect.top - wrapperRect.top) - (wrapperRect.height / 2) + (wordRect.height / 2);
         }
     }
+
+    // --- Click-to-start from text ---
+    function findChunkIndexByWordIndex(globalWordIndex) {
+        for (let i = 0; i < audioQueue.length; i++) {
+            const ch = audioQueue[i];
+            if (globalWordIndex >= ch.startWord && globalWordIndex <= ch.endWord) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    function seekWithinCurrentChunkByWordIndex(globalWordIndex) {
+        if (!Array.isArray(subtitles) || subtitles.length === 0) return false;
+        let best = null;
+        let bestDelta = Infinity;
+        for (const sub of subtitles) {
+            const delta = Math.abs(sub.wordIndex - globalWordIndex);
+            if (delta < bestDelta) {
+                bestDelta = delta;
+                best = sub;
+                if (delta === 0) break;
+            }
+        }
+        if (best) {
+            audioPlayer.currentTime = best.start;
+            // Manually sync highlight immediately
+            highlightCurrentWord(audioPlayer.currentTime);
+            return true;
+        }
+        return false;
+    }
+
+    textDisplay.addEventListener('click', (e) => {
+        const target = e.target;
+        if (!(target instanceof HTMLElement)) return;
+        if (!target.classList.contains('word')) return;
+
+        const wordIndexAttr = target.dataset.wordIndex;
+        if (wordIndexAttr == null) return;
+        const globalWordIndex = parseInt(wordIndexAttr, 10);
+        if (Number.isNaN(globalWordIndex)) return;
+
+        const text = textInput.value.trim();
+        if (!text) {
+            statusBar.innerHTML = 'STATUS: <span class="error">ERROR</span>. Text cannot be empty.';
+            return;
+        }
+
+        // Initialize queue if needed
+        if (audioQueue.length === 0) {
+            setupTextDisplay(text);
+            const textChunks = chunkText(text);
+            audioQueue = textChunks.map(chunkData => ({
+                ...chunkData,
+                status: 'pending',
+                audioUrl: null,
+                subtitleUrl: null,
+                duration: null,
+            }));
+        }
+
+        const targetChunkIndex = findChunkIndexByWordIndex(globalWordIndex);
+        if (targetChunkIndex === -1) return;
+
+        // If already on the target chunk and audio is loaded, seek directly
+        if (currentChunkIndex === targetChunkIndex && audioPlayer.src) {
+            const ok = seekWithinCurrentChunkByWordIndex(globalWordIndex);
+            if (ok && audioPlayer.paused) {
+                audioPlayer.play();
+            }
+            return;
+        }
+
+        // Otherwise, switch to the chunk and start from the clicked word
+        playChunk(targetChunkIndex, null, globalWordIndex);
+    });
 });

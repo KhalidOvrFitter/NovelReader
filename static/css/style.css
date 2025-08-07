@@ -377,6 +377,19 @@ body.theme-monochrome #text-display .word.highlight {
     box-shadow: 0 0 3px rgba(255, 255, 255, 0.5);
 }
 
+/* Make words clickable for click-to-start feature */
+#text-display .word {
+    cursor: pointer;
+}
+
+#text-display .word:hover {
+    text-shadow: 0 0 5px rgba(0, 255, 0, 0.6);
+}
+
+body.theme-monochrome #text-display .word:hover {
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.6);
+}
+
 .playback-controls button:active {
     background-color: #3f3;
     box-shadow: 0 0 15px #3f3;
